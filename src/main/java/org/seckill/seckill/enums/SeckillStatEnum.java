@@ -1,6 +1,7 @@
 package org.seckill.seckill.enums;
 
 public enum SeckillStatEnum {
+    Wait(2,"Wait kill"),
     SUCCESS(1,"Sucess kill"),
     END(0,"End kill"),
     REPEAT_KILL(-1,"Repeat kill"),

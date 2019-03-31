@@ -1,10 +1,14 @@
 package org.seckill.seckill.service;
 
+import com.dyuproject.protostuff.LinkedBuffer;
+import com.dyuproject.protostuff.ProtostuffIOUtil;
+import com.dyuproject.protostuff.runtime.RuntimeSchema;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.seckill.seckill.dto.Exposer;
 import org.seckill.seckill.dto.SeckillExecution;
 import org.seckill.seckill.entity.Seckill;
+import org.seckill.seckill.entity.SeckillMessage;
 import org.seckill.seckill.exception.RepeatKillException;
 import org.seckill.seckill.exception.SeckillCloseException;
 import org.slf4j.Logger;
@@ -13,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -88,6 +93,35 @@ public class SeckillServiceTest {
             SeckillExecution execution = seckillService.executeSeckillProcedure(id,phone,md5);
             logger.info(execution.getStateInfo());
         }
+
+    }
+
+    @Test
+    public void testExecuteSeckillMq(){
+        long id = 1002;
+        long phone = 132541341467L;
+        Exposer exposer = seckillService.exportSeckillUrl(id);
+        if(exposer.isExposed()){
+            String md5 = exposer.getMd5();
+            SeckillExecution execution = seckillService.executeSeckillMq(id,phone,md5);
+            logger.info(execution.getStateInfo());
+        }
+
+    }
+
+    @Test
+    public void testProtoStuff(){
+        RuntimeSchema<SeckillMessage> schema = RuntimeSchema.createFrom(SeckillMessage.class);
+        SeckillMessage seckillMessage = new SeckillMessage(1003L,15002894830L,"dasfdasfaf");
+        byte[] result = ProtostuffIOUtil.toByteArray(seckillMessage,schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        String msg = new String(result);
+
+
+        SeckillMessage message = schema.newMessage();
+        ProtostuffIOUtil.mergeFrom(msg.getBytes(),message,schema);
+        logger.info(message.toString());
+
+
 
     }
 }
